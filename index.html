@@ -174,18 +174,25 @@
                 return; // Stop execution
             }
 
-            // 4. Determine API URL based on 'north' parameter
+            // 4. Determine API URL based on URL parameters
             loadingEl.classList.remove('hidden');
             
             // Define endpoints
             const standardEndpoint = "https://script.google.com/macros/s/AKfycbya3qV3NYY0IUw9y7m4ZFup-hcR_9DbYo6iPciA7rkBwWJ2tXvu0DfDIGOW-xC1A0wp/exec";
             const northEndpoint = "https://script.google.com/macros/s/AKfycbyQTpa0wXqC3fqoU6A6LvOqJov2SqI7Lj40exnD4yxZZkB_qW-ttPPXy1bfn1l1mCPf/exec";
+            const north26Endpoint = "https://script.google.com/macros/s/AKfycbzs-_taSc1Pex-FZGCT0xge5JKarvp5oiR_KPVyOGx9jILoFcfe2cA3gVZGO-6tX1sD/exec";
 
-            // Check if 'north' exists in URL parameters (e.g. ?id=123&north)
+            // Check URL parameters for flags (e.g. ?id=123&north26 or ?id=123&north)
+            const isNorth26 = params.has('north26');
             const isNorth = params.has('north');
             
             // Select the correct base URL
-            const baseUrl = isNorth ? northEndpoint : standardEndpoint;
+            let baseUrl = standardEndpoint;
+            if (isNorth26) {
+                baseUrl = north26Endpoint;
+            } else if (isNorth) {
+                baseUrl = northEndpoint;
+            }
             
             // Construct the final API call
             const apiUrl = `${baseUrl}?id=${userId}`;
@@ -210,7 +217,19 @@
                 const result = await response.json();
 
                 if (result.status === "success" && result.data) {
-                    const user = result.data;
+                    const raw = result.data;
+                    const user = {
+                        firstName: raw.firstName || raw['First Name'] || '',
+                        lastName: raw.lastName || raw['Last Name'] || '',
+                        company: raw.company || raw['University / Company'] || '',
+                        specialization: raw.specialization || raw['Your Specialization'] || '',
+                        experience: raw.experience || raw['Experience / Study Category (Select all that apply)'] || '',
+                        email: raw.email || raw['Email'] || '',
+                        linkedin: raw.linkedin || raw['LinkedIn or GitHub URL'] || '',
+                        interestedIn: raw.interestedIn || raw['Please select the technologies you are interested in'] || '',
+                        phone: raw.phone || raw['Phone Number'] || '',
+                        ...raw
+                    };
 
                     // 5. Populate the card with user data
                     populateCard(user);
