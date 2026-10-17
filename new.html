@@ -340,7 +340,7 @@
             const whatsappBtn = document.getElementById('whatsappBtn');
             if (user.phone) {
                 // Clean the phone number (remove +, spaces, etc. for the URL)
-                const whatsappNumber = user.phone.replace(/[\s+()-]/g, '');
+                const whatsappNumber = String(user.phone).replace(/[\s+()-]/g, '');
                 whatsappBtn.href = `https://wa.me/${whatsappNumber}`;
                 whatsappBtn.classList.remove('hidden'); // Show the button
             }
